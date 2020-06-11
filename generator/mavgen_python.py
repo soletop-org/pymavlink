@@ -981,7 +981,7 @@ def generate(basename, xml):
             m.len_map[n] = m.fieldlengths[i]
 
     print("Generating %s" % filename)
-    outf = open(filename, "w")
+    outf = open(filename, "w", encoding='UTF8')
     generate_preamble(outf, msgs, basename, filelist, xml[0])
     generate_enums(outf, enums)
     generate_message_ids(outf, msgs)
