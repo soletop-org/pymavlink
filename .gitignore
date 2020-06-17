@@ -21,5 +21,6 @@ include/
 .tags*
 include/mavlink/v1.0
 *.pyc
-dialects/v10/*.*
-dialects/v20/*.*
+dialects/
+.eggs/
+
