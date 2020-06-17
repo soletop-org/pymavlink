@@ -9,11 +9,13 @@ from __future__ import print_function
 
 from builtins import range
 
-import os
+import os, sys
 import textwrap
 from . import mavtemplate
 
 t = mavtemplate.MAVTemplate()
+
+platform = sys.platform
 
 
 def generate_preamble(outf, msgs, basename, args, xml):
@@ -981,7 +983,11 @@ def generate(basename, xml):
             m.len_map[n] = m.fieldlengths[i]
 
     print("Generating %s" % filename)
-    outf = open(filename, "w", encoding='UTF8')
+    if platform == 'win32':
+        outf = open(filename, "w", encoding='UTF8')
+    else:
+        outf = open(filename, "w")
+        
     generate_preamble(outf, msgs, basename, filelist, xml[0])
     generate_enums(outf, enums)
     generate_message_ids(outf, msgs)

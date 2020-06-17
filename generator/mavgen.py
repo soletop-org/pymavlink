@@ -42,17 +42,28 @@ def mavgen(opts, args):
     xml = []
     all_files = set()
 
+    platform = sys.platform
+
     # Enable validation by default, disabling it if explicitly requested
     if opts.validate:
         try:
             from lxml import etree
-            with open(schemaFile, 'r', encoding='UTF8') as f:
-                xmlschema_root = etree.parse(f)
-                if not opts.strict_units:
-                    # replace the strict "SI_Unit" list of known unit strings with a more generic "xs:string" type
-                    for elem in xmlschema_root.iterfind('xs:attribute[@name="units"]', xmlschema_root.getroot().nsmap):
-                        elem.set("type", "xs:string")
-                xmlschema = etree.XMLSchema(xmlschema_root)
+            if platform == 'win32':
+                with open(schemaFile, 'r', encoding='UTF8') as f:
+                    xmlschema_root = etree.parse(f)
+                    if not opts.strict_units:
+                        # replace the strict "SI_Unit" list of known unit strings with a more generic "xs:string" type
+                        for elem in xmlschema_root.iterfind('xs:attribute[@name="units"]', xmlschema_root.getroot().nsmap):
+                            elem.set("type", "xs:string")
+                    xmlschema = etree.XMLSchema(xmlschema_root)
+            else:
+                with open(schemaFile, 'r') as f:
+                    xmlschema_root = etree.parse(f)
+                    if not opts.strict_units:
+                        # replace the strict "SI_Unit" list of known unit strings with a more generic "xs:string" type
+                        for elem in xmlschema_root.iterfind('xs:attribute[@name="units"]', xmlschema_root.getroot().nsmap):
+                            elem.set("type", "xs:string")
+                    xmlschema = etree.XMLSchema(xmlschema_root)
         except ImportError:
             print("WARNING: Failed to import lxml module etree. Are lxml, libxml2 and libxslt installed? XML validation will not be performed", file=sys.stderr)
             opts.validate = False
@@ -103,20 +114,36 @@ def mavgen(opts, args):
            here because it relies on the XML libs that were loaded in mavgen(), so it can't be called standalone"""
         xmlvalid = True
         try:
-            with open(xmlfile, 'r', encoding='UTF8') as f:
-                xmldocument = etree.parse(f)
-                xmlschema.assertValid(xmldocument)
-                forbidden_names_re = re.compile("^(break$|case$|class$|catch$|const$|continue$|debugger$|default$|delete$|do$|else$|\
-                                    export$|extends$|finally$|for$|function$|if$|import$|in$|instanceof$|let$|new$|\
-                                    return$|super$|switch$|this$|throw$|try$|typeof$|var$|void$|while$|with$|yield$|\
-                                    enum$|await$|implements$|package$|protected$|static$|interface$|private$|public$|\
-                                    abstract$|boolean$|byte$|char$|double$|final$|float$|goto$|int$|long$|native$|\
-                                    short$|synchronized$|transient$|volatile$).*", re.IGNORECASE)
-                for element in xmldocument.iter('enum', 'entry', 'message', 'field'):
-                    if forbidden_names_re.search(element.get('name')):
-                        print("Validation error:", file=sys.stderr)
-                        print("Element : %s at line : %s contains forbidden word" % (element.tag, element.sourceline), file=sys.stderr)
-                        xmlvalid = False
+            if platform == 'win32':
+                with open(xmlfile, 'r', encoding='UTF8') as f:
+                    xmldocument = etree.parse(f)
+                    xmlschema.assertValid(xmldocument)
+                    forbidden_names_re = re.compile("^(break$|case$|class$|catch$|const$|continue$|debugger$|default$|delete$|do$|else$|\
+                                        export$|extends$|finally$|for$|function$|if$|import$|in$|instanceof$|let$|new$|\
+                                        return$|super$|switch$|this$|throw$|try$|typeof$|var$|void$|while$|with$|yield$|\
+                                        enum$|await$|implements$|package$|protected$|static$|interface$|private$|public$|\
+                                        abstract$|boolean$|byte$|char$|double$|final$|float$|goto$|int$|long$|native$|\
+                                        short$|synchronized$|transient$|volatile$).*", re.IGNORECASE)
+                    for element in xmldocument.iter('enum', 'entry', 'message', 'field'):
+                        if forbidden_names_re.search(element.get('name')):
+                            print("Validation error:", file=sys.stderr)
+                            print("Element : %s at line : %s contains forbidden word" % (element.tag, element.sourceline), file=sys.stderr)
+                            xmlvalid = False
+            else:
+                with open(xmlfile, 'r') as f:
+                    xmldocument = etree.parse(f)
+                    xmlschema.assertValid(xmldocument)
+                    forbidden_names_re = re.compile("^(break$|case$|class$|catch$|const$|continue$|debugger$|default$|delete$|do$|else$|\
+                                        export$|extends$|finally$|for$|function$|if$|import$|in$|instanceof$|let$|new$|\
+                                        return$|super$|switch$|this$|throw$|try$|typeof$|var$|void$|while$|with$|yield$|\
+                                        enum$|await$|implements$|package$|protected$|static$|interface$|private$|public$|\
+                                        abstract$|boolean$|byte$|char$|double$|final$|float$|goto$|int$|long$|native$|\
+                                        short$|synchronized$|transient$|volatile$).*", re.IGNORECASE)
+                    for element in xmldocument.iter('enum', 'entry', 'message', 'field'):
+                        if forbidden_names_re.search(element.get('name')):
+                            print("Validation error:", file=sys.stderr)
+                            print("Element : %s at line : %s contains forbidden word" % (element.tag, element.sourceline), file=sys.stderr)
+                            xmlvalid = False
 
             return xmlvalid
         except etree.XMLSchemaError:

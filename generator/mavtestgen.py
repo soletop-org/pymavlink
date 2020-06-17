@@ -127,13 +127,23 @@ if mavparse.check_duplicates(msgs):
 
 print("Found %u MAVLink message types" % len(msgs))
 
+platform = sys.platform
+
 print("Generating python %s" % (args.output+'.py'))
-outf = open(args.output + '.py', "w", encoding='UTF8')
+if platform == 'win32':
+    outf = open(args.output + '.py', "w", encoding='UTF8')
+else:
+    outf = open(args.output + '.py', "w")
+
 generate_methods_python(outf, msgs)
 outf.close()
 
 print("Generating C %s" % (args.output+'.h'))
-outf = open(args.output + '.h', "w", encoding='UTF8')
+if platform == 'win32':
+    outf = open(args.output + '.h', "w", encoding='UTF8')
+else:
+    outf = open(args.output + '.h', "w")
+    
 generate_methods_C(outf, msgs)
 outf.close()
 
