@@ -9,6 +9,8 @@
 
 
 <!-- definition of attributes -->
+<xs:attribute name="min" /> <!-- 1kWAGV only-->
+<xs:attribute name="max" /> <!-- 1kWAGV only-->
 <xs:attribute name="name"> <!-- used in enum,entry,message,field elements -->
 </xs:attribute>
 <xs:attribute name="id" type="xs:unsignedShort"/> <!-- used in message elements -->
@@ -208,6 +210,8 @@
         <xs:attribute ref="enum" />
         <xs:attribute ref="display" />
         <xs:attribute ref="units" />
+        <xs:attribute ref="min" /> <!-- 1kWAGV only-->
+        <xs:attribute ref="max" /> <!-- 1kWAGV only-->
         <xs:attribute ref="default" />
     </xs:complexType>
 </xs:element>
